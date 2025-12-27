@@ -94,6 +94,7 @@ display_header() {
 ========================================================================
 EOF
     echo
+    
 }
 # Function to display colored output
 print_status() {
