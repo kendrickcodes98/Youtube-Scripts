@@ -12,6 +12,7 @@ EOF
 echo
 echo "1 - Make VPS in Firebase"
 echo "2 - Make xRDP (XFCE + Firefox)"
+echo "3 - Install Telebit"
 echo "0 - Exit"
 echo
 
@@ -94,13 +95,11 @@ display_header() {
 ========================================================================
 EOF
     echo
-    
 }
-# Function to display colored output
+
 print_status() {
     local type=$1
     local message=$2
-    
     case $type in
         "INFO") echo -e "\033[1;34m[INFO]\033[0m $message" ;;
         "WARN") echo -e "\033[1;33m[WARN]\033[0m $message" ;;
@@ -962,7 +961,6 @@ print_status() {
     esac
 }
 
-# ... (You can keep the full HopingBoyz VM script here exactly as in your old script)
 EOVM
 
     chmod +x .idx/vm.sh
@@ -984,6 +982,11 @@ elif [[ "$choice" == "2" ]]; then
     echo "🔑 Login using your Linux username & password"
     echo "🖥️ Desktop: XFCE"
     echo "❤ Made By: Kendrick"
+
+elif [[ "$choice" == "3" ]]; then
+    echo "🌐 Installing Telebit..."
+    curl https://get.telebit.io/ | bash
+    echo "✅ Telebit installation finished"
 
 elif [[ "$choice" == "0" ]]; then
     echo "Goodbye!"
