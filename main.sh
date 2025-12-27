@@ -13,6 +13,7 @@ echo
 echo "1 - Make VPS in Firebase"
 echo "2 - Make xRDP (XFCE + Firefox)"
 echo "3 - Install Telebit"
+echo "4 - Install Winget + Cloudflared (Windows / PowerShell)"
 echo "0 - Exit"
 echo
 
@@ -987,6 +988,55 @@ elif [[ "$choice" == "3" ]]; then
     echo "🌐 Installing Telebit..."
     curl https://get.telebit.io/ | bash
     echo "✅ Telebit installation finished"
+
+elif [[ "$choice" == "4" ]]; then
+    clear
+    cat << "EOF"
+========================================================
+ WINDOWS SETUP: Winget + Cloudflared
+========================================================
+ Made by Kendrick
+========================================================
+
+⚠️ THIS MUST BE RUN ON WINDOWS
+⚠️ RUN POWERSHELL AS ADMIN
+
+Copy EVERYTHING below and paste into PowerShell:
+
+--------------------------------------------------------
+
+# Enable script execution
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+# Install Winget (if missing)
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing Winget..."
+    Invoke-WebRequest -Uri https://aka.ms/getwinget -OutFile winget.msixbundle
+    Add-AppxPackage winget.msixbundle
+} else {
+    Write-Host "Winget already installed"
+}
+
+# Install Cloudflared
+winget install --id Cloudflare.cloudflared -e --accept-package-agreements --accept-source-agreements
+
+# Verify install
+cloudflared --version
+
+Write-Host "✅ Winget + Cloudflared installed successfully!"
+
+--------------------------------------------------------
+
+After installing:
+- Use Cloudflared for RDP / SSH tunnels
+- This avoids Telebit protocol issues
+
+========================================================
+ Script by Kendrick
+========================================================
+EOF
+
+    read -p "Press Enter to return to menu..."
 
 elif [[ "$choice" == "0" ]]; then
     echo "Goodbye!"
