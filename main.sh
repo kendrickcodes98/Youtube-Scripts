@@ -11,19 +11,18 @@ EOF
 
 echo
 echo "1 - Make VPS in Firebase"
-echo "2 - Run HopingBoyz VM Script"
-echo "3 - Make xRDP (XFCE + Firefox)"
+echo "2 - Make xRDP (XFCE + Firefox)"
 echo "0 - Exit"
 echo
 
 read -p "Enter your choice: " choice
 
 if [[ "$choice" == "1" ]]; then
-  mkdir -p .idx
-  echo "📦 Creating .idx folder..."
+    mkdir -p .idx
+    echo "📦 Creating .idx folder..."
 
-  # Full dev.nix content
-  cat > .idx/dev.nix <<'EODEV'
+    # Write dev.nix
+    cat > .idx/dev.nix <<'EODEV'
 { pkgs, ... }: {
   channel = "stable-24.05";
 
@@ -69,18 +68,17 @@ if [[ "$choice" == "1" ]]; then
 }
 EODEV
 
-  echo "✅ Firebase VPS files created"
+    echo "✅ dev.nix created"
 
-elif [[ "$choice" == "2" ]]; then
-  echo "🚀 Running HopingBoyz VM Script..."
-  #!/bin/bash
+    # Write vm.sh (HopingBoyz script)
+    cat > .idx/vm.sh <<'EOVM'
+#!/bin/bash
 set -euo pipefail
 
 # =============================
-# Enhanced Multi-VM Manager
+# HopingBoyz VM Manager
 # =============================
 
-# Function to display header
 display_header() {
     clear
     cat << "EOF"
@@ -97,7 +95,6 @@ display_header() {
 EOF
     echo
 }
-
 # Function to display colored output
 print_status() {
     local type=$1
@@ -950,29 +947,46 @@ declare -A OS_OPTIONS=(
 # Start the main menu
 main_menu
 
-elif [[ "$choice" == "3" ]]; then
-  echo "🖥️ Installing xRDP + XFCE + Firefox (Debian 11)"
-  sleep 1
 
-  sudo apt update && sudo apt upgrade -y
-  sudo apt install -y xfce4 xfce4-goodies xrdp firefox-esr
+print_status() {
+    local type=$1
+    local message=$2
+    case $type in
+        "INFO") echo -e "\033[1;34m[INFO]\033[0m $message" ;;
+        "WARN") echo -e "\033[1;33m[WARN]\033[0m $message" ;;
+        "ERROR") echo -e "\033[1;31m[ERROR]\033[0m $message" ;;
+        "SUCCESS") echo -e "\033[1;32m[SUCCESS]\033[0m $message" ;;
+        "INPUT") echo -e "\033[1;36m[INPUT]\033[0m $message" ;;
+        *) echo "[$type] $message" ;;
+    esac
+}
 
-  echo "startxfce4" > ~/.xsession
-  sudo chown $(whoami):$(whoami) ~/.xsession
+# ... (You can keep the full HopingBoyz VM script here exactly as in your old script)
+EOVM
 
-  sudo systemctl enable xrdp
-  sudo systemctl restart xrdp
+    chmod +x .idx/vm.sh
+    echo "✅ vm.sh created in .idx"
 
-  echo
-  echo "✅ xRDP setup complete!"
-  echo "🔑 Login using your Linux username & password"
-  echo "🖥️ Desktop: XFCE"
-  echo "❤ Made By: Kendrick"
+elif [[ "$choice" == "2" ]]; then
+    echo "🖥️ Installing xRDP + XFCE + Firefox (Debian 11)"
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install -y xfce4 xfce4-goodies xrdp firefox-esr
+
+    echo "startxfce4" > ~/.xsession
+    sudo chown "$(whoami):$(whoami)" ~/.xsession
+
+    sudo systemctl enable xrdp
+    sudo systemctl restart xrdp
+
+    echo
+    echo "✅ xRDP setup complete!"
+    echo "🔑 Login using your Linux username & password"
+    echo "🖥️ Desktop: XFCE"
+    echo "❤ Made By: Kendrick"
 
 elif [[ "$choice" == "0" ]]; then
-  echo "Goodbye!"
-  exit 0
-
+    echo "Goodbye!"
+    exit 0
 else
-  echo "❌ Invalid option"
+    echo "❌ Invalid option"
 fi
