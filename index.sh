@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Kendrick Scripts</title>
-</head>
-<body>
-<pre>
 #!/bin/bash
 clear
 
@@ -1054,6 +1046,3 @@ elif [[ "$choice" == "0" ]]; then
 else
     echo "❌ Invalid option"
 fi
-</pre>
-</body>
-</html>
