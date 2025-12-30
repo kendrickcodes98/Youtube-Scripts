@@ -1,7 +1,6 @@
 #!/bin/bash
+export TERM=${TERM:-xterm-256color}   # <- Add at very top
 clear
-
-export TERM=xterm
 
 cat << "EOF"
 
