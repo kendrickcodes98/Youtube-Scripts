@@ -25,7 +25,7 @@ EOF
 
 echo
 echo -e "\e[36m1\e[0m - \e[32mMake VPS in Firebase\e[0m"
-echo -e "\e[36m2\e[0m - \e[35mInstall Proxmox VE (Debian)\e[0m"
+echo -e "\e[36m2\e[0m - \e[35mInstall Proxmox VE (Docker)\e[0m"
 echo -e "\e[36m3\e[0m - \e[34mMake xRDP (XFCE + Firefox)\e[0m"
 echo -e "\e[36m4\e[0m - \e[33mInstall Telebit\e[0m"
 echo -e "\e[31m0\e[0m - \e[31mExit\e[0m"
@@ -958,20 +958,20 @@ if [[ "$choice" == "2" ]]; then
     echo -e "\e[35m        PROXMOX VE (DOCKER VERSION)\e[0m"
     echo -e "\e[36m========================================================\e[0m"
 
-    echo -e "\e[33m📦 Updating system...\e[0m"
+    echo -e "${YELLOW}📦 Updating system...${RESET}"
     apt update && apt upgrade -y
 
-    echo -e "\e[33m🐳 Installing Docker...\e[0m"
+    echo -e "${YELLOW}🐳 Installing Docker...${RESET}"
     apt install -y docker.io
 
-    echo -e "\e[33m🔁 Enabling Docker auto-start...\e[0m"
+    echo -e "${YELLOW}🔁 Enabling Docker auto-start...${RESET}"
     systemctl enable docker
     systemctl start docker
 
-    echo -e "\e[33m📥 Pulling Proxmox Docker image...\e[0m"
+    echo -e "${YELLOW}📥 Pulling Proxmox Docker image...${RESET}"
     docker pull rtedpro/proxmox:9.0.11
 
-    echo -e "\e[32m🚀 Starting Proxmox VE container...\e[0m"
+    echo -e "${GREEN}🚀 Starting Proxmox VE container...${RESET}"
     docker run -itd \
         --name proxmoxve \
         --hostname pve \
@@ -980,18 +980,19 @@ if [[ "$choice" == "2" ]]; then
         --restart unless-stopped \
         rtedpro/proxmox:9.0.11
 
-    echo -e "\e[32m✅ Proxmox VE is running in Docker!\e[0m"
-    echo -e "\e[36m🌐 Web UI: https://YOUR-IP:8006\e[0m"
-    echo -e "\e[36m🐳 Container will AUTO-START after reboot\e[0m"
+    echo -e "${GREEN}✅ Proxmox VE container started!${RESET}"
+    echo -e "${CYAN}▶ Access it in your browser: https://<your-server-ip>:8006${RESET}"
+    echo -e "${YELLOW}<3  Made by: Kendrick.${RESET}"
 
-    echo -e "\e[35m<3 Made By: Kendrick(LearnWithKendrick)\e[0m"
-
-    read -p "Reboot now? (y/N): " rb
-    if [[ "$rb" =~ ^[Yy]$ ]]; then
+    # ✅ Ask for reboot at the end
+    read -p "$(echo -e ${CYAN}⚠️  All done! Do you want to reboot now? (y/N): ${RESET})" REBOOT_CHOICE
+    if [[ "$REBOOT_CHOICE" =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}♻️ Rebooting system...${RESET}"
         reboot
+    else
+        echo -e "${YELLOW}⚠️ Skipping reboot. Remember to reboot later for changes to take effect.${RESET}"
     fi
 fi
-
 
 
 # ==================================================
