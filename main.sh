@@ -1001,7 +1001,7 @@ elif [[ "$choice" == "4" ]]; then
     echo -e "${YELLOW}        Installing Telebit${RESET}"
     echo -e "${CYAN}========================================================${RESET}"
 
-    curl -fsSL https://get.telebit.cloud/install.sh | sh
+    curl https://get.telebit.io/ | bash
     echo -e "${GREEN}✅ Telebit installed!${RESET}"
     echo -e "${CYAN}▶ Run it using: telebit help${RESET}"
 
