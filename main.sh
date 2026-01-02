@@ -950,8 +950,9 @@ EOVM
     echo "✅ vm.sh created in .idx"
     echo -e "${GREEN}✅ VM Manager installed${RESET}"
     echo -e "${YELLOW}▶ Run it using:${RESET} cd .idx && bash vm.sh"
+fi
 
-    elif [[ "$choice" == "2" ]]; then
+    if [[ "$choice" == "2" ]]; then
     clear
     echo -e "\e[36m========================================================\e[0m"
     echo -e "\e[35m        PROXMOX VE (DOCKER VERSION)\e[0m"
