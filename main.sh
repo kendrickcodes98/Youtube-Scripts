@@ -24,22 +24,23 @@ cat << "EOF"
 EOF
 
 echo
-echo -e "\e[36m1\e[0m - \e[32mMake VPS in Firebase\e[0m"
-echo -e "\e[36m2\e[0m - \e[35mInstall Proxmox VE (Docker)\e[0m"
-echo -e "\e[36m3\e[0m - \e[34mMake xRDP (XFCE + Firefox)\e[0m"
-echo -e "\e[36m4\e[0m - \e[33mInstall Telebit\e[0m"
-echo -e "\e[31m0\e[0m - \e[31mExit\e[0m"
+echo -e "${CYAN}1${RESET} - ${GREEN}Make VPS in Firebase${RESET}"
+echo -e "${CYAN}2${RESET} - ${MAGENTA}Install Proxmox VE (Docker)${RESET}"
+echo -e "${CYAN}3${RESET} - ${BLUE}Make xRDP (XFCE + Firefox)${RESET}"
+echo -e "${CYAN}4${RESET} - ${YELLOW}Install Telebit${RESET}"
+echo -e "${RED}0${RESET} - ${RED}Exit${RESET}"
 echo
 
 read -p "Enter your choice: " choice
 
-# ==================================================
-# OPTION 1 - FIREBASE VPS + HOPINGBOYZ
-# ==================================================
+# =============================
+# CHOICE HANDLING
+# =============================
 if [[ "$choice" == "1" ]]; then
     mkdir -p .idx
     echo -e "${BLUE}📦 Creating .idx folder...${RESET}"
 
+    # dev.nix
     cat > .idx/dev.nix <<'EODEV'
 { pkgs, ... }: {
   channel = "stable-24.05";
@@ -51,18 +52,22 @@ if [[ "$choice" == "1" ]]; then
   };
 }
 EODEV
-
     echo -e "${GREEN}✅ dev.nix created${RESET}"
 
-    # ================= HOPINGBOYZ VM SCRIPT =================
+    # vm.sh
     cat > .idx/vm.sh <<'EOVM'
 #!/bin/bash
 set -euo pipefail
 
+# === Full HopingBoyz VM Manager Script ===
+#!/bin/bash
+set -euo pipefail
+
 # =============================
-# HopingBoyz VM Manager
+# Enhanced Multi-VM Manager
 # =============================
 
+# Function to display header
 display_header() {
     clear
     cat << "EOF"
@@ -80,9 +85,11 @@ EOF
     echo
 }
 
+# Function to display colored output
 print_status() {
     local type=$1
     local message=$2
+    
     case $type in
         "INFO") echo -e "\033[1;34m[INFO]\033[0m $message" ;;
         "WARN") echo -e "\033[1;33m[WARN]\033[0m $message" ;;
@@ -930,33 +937,18 @@ declare -A OS_OPTIONS=(
 # Start the main menu
 main_menu
 
-
-print_status() {
-    local type=$1
-    local message=$2
-    case $type in
-        "INFO") echo -e "\033[1;34m[INFO]\033[0m $message" ;;
-        "WARN") echo -e "\033[1;33m[WARN]\033[0m $message" ;;
-        "ERROR") echo -e "\033[1;31m[ERROR]\033[0m $message" ;;
-        "SUCCESS") echo -e "\033[1;32m[SUCCESS]\033[0m $message" ;;
-        "INPUT") echo -e "\033[1;36m[INPUT]\033[0m $message" ;;
-        *) echo "[$type] $message" ;;
-    esac
-}
-
 EOVM
 
     chmod +x .idx/vm.sh
     echo "✅ vm.sh created in .idx"
     echo -e "${GREEN}✅ VM Manager installed${RESET}"
     echo -e "${YELLOW}▶ Run it using:${RESET} cd .idx && bash vm.sh"
-fi
 
-if [[ "$choice" == "2" ]]; then
+elif [[ "$choice" == "2" ]]; then
     clear
-    echo -e "\e[36m========================================================\e[0m"
-    echo -e "\e[35m        PROXMOX VE (DOCKER VERSION)\e[0m"
-    echo -e "\e[36m========================================================\e[0m"
+    echo -e "${CYAN}========================================================${RESET}"
+    echo -e "${MAGENTA}        PROXMOX VE (DOCKER VERSION)${RESET}"
+    echo -e "${CYAN}========================================================${RESET}"
 
     echo -e "${YELLOW}📦 Updating system...${RESET}"
     apt update && apt upgrade -y
@@ -984,42 +976,38 @@ if [[ "$choice" == "2" ]]; then
     echo -e "${CYAN}▶ Access it in your browser: https://<your-server-ip>:8006${RESET}"
     echo -e "${YELLOW}<3  Made by: Kendrick.${RESET}"
 
-    # ✅ Ask for reboot at the end
-    read -p "$(echo -e ${CYAN}⚠️  All done! Do you want to reboot now? (y/N): ${RESET})" REBOOT_CHOICE
-    if [[ "$REBOOT_CHOICE" =~ ^[Yy]$ ]]; then
-        echo -e "${GREEN}♻️ Rebooting system...${RESET}"
-        reboot
-    else
-        echo -e "${YELLOW}⚠️ Skipping reboot. Remember to reboot later for changes to take effect.${RESET}"
-    fi
-fi
-
-
-# ==================================================
-# OPTION 3 - XRDP
-# ==================================================
 elif [[ "$choice" == "3" ]]; then
-    echo -e "${BLUE}🖥 Installing xRDP + XFCE + Firefox${RESET}"
-    sudo apt update && sudo apt install -y xfce4 xfce4-goodies xrdp firefox-esr
+    clear
+    echo -e "${CYAN}========================================================${RESET}"
+    echo -e "${BLUE}        Installing xRDP + XFCE + Firefox${RESET}"
+    echo -e "${CYAN}========================================================${RESET}"
+
+    apt update && apt upgrade -y
+    apt install -y xfce4 xfce4-goodies xrdp firefox-esr
+
     echo "startxfce4" > ~/.xsession
-    sudo systemctl enable xrdp && sudo systemctl restart xrdp
-    echo -e "${GREEN}✅ xRDP Ready${RESET}"
-    echo -e "${MAGENTA}❤ Made By Kendrick${RESET}"
+    sudo chown "$USER:$USER" ~/.xsession
 
-# ==================================================
-# OPTION 4 - TELEBIT
-# ==================================================
+    systemctl enable xrdp
+    systemctl start xrdp
+
+    echo -e "${GREEN}✅ xRDP + XFCE + Firefox installed!${RESET}"
+    echo -e "${CYAN}▶ Connect via RDP client to your server IP${RESET}"
+
 elif [[ "$choice" == "4" ]]; then
-    echo -e "${BLUE}🌐 Installing Telebit...${RESET}"
-    curl https://get.telebit.io/ | bash
-    echo -e "${GREEN}✅ Telebit Installed${RESET}"
+    clear
+    echo -e "${CYAN}========================================================${RESET}"
+    echo -e "${YELLOW}        Installing Telebit${RESET}"
+    echo -e "${CYAN}========================================================${RESET}"
 
-# ==================================================
-# EXIT
-# ==================================================
+    curl -fsSL https://get.telebit.cloud/install.sh | sh
+    echo -e "${GREEN}✅ Telebit installed!${RESET}"
+    echo -e "${CYAN}▶ Run it using: telebit help${RESET}"
+
 elif [[ "$choice" == "0" ]]; then
-    echo -e "${RED}Goodbye!${RESET}"
+    echo -e "${RED}Exiting...${RESET}"
     exit 0
+
 else
-    echo -e "${RED}❌ Invalid option${RESET}"
+    echo -e "${RED}Invalid choice!${RESET}"
 fi
