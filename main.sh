@@ -954,47 +954,43 @@ EOVM
     elif [[ "$choice" == "2" ]]; then
     clear
     echo -e "\e[36m========================================================\e[0m"
-    echo -e "\e[32m        PROXMOX VE INSTALLER (DEBIAN)\e[0m"
+    echo -e "\e[35m        PROXMOX VE (DOCKER VERSION)\e[0m"
     echo -e "\e[36m========================================================\e[0m"
-
-    if ! grep -qi debian /etc/os-release; then
-        echo -e "\e[31m❌ This installer is ONLY for Debian\e[0m"
-        exit 1
-    fi
 
     echo -e "\e[33m📦 Updating system...\e[0m"
     apt update && apt upgrade -y
 
-    echo -e "\e[33m📦 Installing required packages...\e[0m"
-    apt install -y wget curl gnupg lsb-release
+    echo -e "\e[33m🐳 Installing Docker...\e[0m"
+    apt install -y docker.io
 
-    echo -e "\e[33m🔑 Adding Proxmox GPG key...\e[0m"
-    wget -qO /etc/apt/trusted.gpg.d/proxmox-release.gpg \
-    https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg
+    echo -e "\e[33m🔁 Enabling Docker auto-start...\e[0m"
+    systemctl enable docker
+    systemctl start docker
 
-    echo -e "\e[33m📦 Adding Proxmox repository...\e[0m"
-    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" \
-    > /etc/apt/sources.list.d/pve-install-repo.list
+    echo -e "\e[33m📥 Pulling Proxmox Docker image...\e[0m"
+    docker pull rtedpro/proxmox:9.0.11
 
-    echo -e "\e[33m📦 Updating repo...\e[0m"
-    apt update
+    echo -e "\e[32m🚀 Starting Proxmox VE container...\e[0m"
+    docker run -itd \
+        --name proxmoxve \
+        --hostname pve \
+        -p 8006:8006 \
+        --privileged \
+        --restart unless-stopped \
+        rtedpro/proxmox:9.0.11
 
-    echo -e "\e[32m🚀 Installing Proxmox VE...\e[0m"
-    apt install -y proxmox-ve postfix open-iscsi
+    echo -e "\e[32m✅ Proxmox VE is running in Docker!\e[0m"
+    echo -e "\e[36m🌐 Web UI: https://YOUR-IP:8006\e[0m"
+    echo -e "\e[36m🐳 Container will AUTO-START after reboot\e[0m"
 
-    echo -e "\e[33m🧹 Removing enterprise repo warning...\e[0m"
-    rm -f /etc/apt/sources.list.d/pve-enterprise.list
-    apt update
-
-    echo -e "\e[32m✅ Proxmox VE Installed Successfully!\e[0m"
-    echo -e "\e[36m🌐 Access Web UI: https://YOUR-IP:8006\e[0m"
-     echo -e "\e[36m❤ Made By: Kendrick(LearnWithKendrick)\e[0m"
-    echo -e "\e[31m⚠️ REBOOT REQUIRED\e[0m"
+    echo -e "\e[35m<3 Made By: Kendrick(LearnWithKendrick) bruh\e[0m"
 
     read -p "Reboot now? (y/N): " rb
     if [[ "$rb" =~ ^[Yy]$ ]]; then
         reboot
     fi
+fi
+
 
 
 # ==================================================
