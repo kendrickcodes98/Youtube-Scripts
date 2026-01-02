@@ -454,7 +454,7 @@ start_vm() {
 
         # Add GUI or console mode
         if [[ "$GUI_MODE" == true ]]; then
-            qemu_cmd+=(-vga virtio -display gtk,gl=on)
+            qemu_cmd+=(-vga virtio -display gtk,gl=off)
         else
             qemu_cmd+=(-nographic -serial mon:stdio)
         fi
