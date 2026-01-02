@@ -1,5 +1,17 @@
-#!/bin/bash   
+#!/bin/bash
 clear
+
+# =============================
+# Colors
+# =============================
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[34m"
+CYAN="\e[36m"
+MAGENTA="\e[35m"
+RESET="\e[0m"
+BOLD="\e[1m"
 
 cat << "EOF"
 
@@ -12,69 +24,37 @@ cat << "EOF"
 EOF
 
 echo
-echo "1 - Make VPS in Firebase"
-echo "2 - Make xRDP (XFCE + Firefox)"
-echo "3 - Install Telebit"
-echo "4 - Install Winget + Cloudflared (Windows / PowerShell)"
-echo "0 - Exit"
+echo -e "\e[36m1\e[0m - \e[32mMake VPS in Firebase\e[0m"
+echo -e "\e[36m2\e[0m - \e[35mInstall Proxmox VE (Debian)\e[0m"
+echo -e "\e[36m3\e[0m - \e[34mMake xRDP (XFCE + Firefox)\e[0m"
+echo -e "\e[36m4\e[0m - \e[33mInstall Telebit\e[0m"
+echo -e "\e[31m0\e[0m - \e[31mExit\e[0m"
 echo
 
 read -p "Enter your choice: " choice
 
+# ==================================================
+# OPTION 1 - FIREBASE VPS + HOPINGBOYZ
+# ==================================================
 if [[ "$choice" == "1" ]]; then
     mkdir -p .idx
-    echo "📦 Creating .idx folder..."
+    echo -e "${BLUE}📦 Creating .idx folder...${RESET}"
 
-    # Write dev.nix
     cat > .idx/dev.nix <<'EODEV'
 { pkgs, ... }: {
   channel = "stable-24.05";
-
   packages = with pkgs; [
-    unzip
-    openssh
-    git
-    qemu_kvm
-    sudo
-    cdrkit
-    cloud-utils
-    qemu
-    docker
+    unzip openssh git qemu_kvm sudo cdrkit cloud-utils qemu docker
   ];
-
   env = {
     EDITOR = "nano";
-    runScript = ''
-      export XDG_RUNTIME_DIR=/run/user/$(id -u)
-      export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-      mkdir -p $XDG_RUNTIME_DIR/docker
-      if ! pgrep -x dockerd-rootless >/dev/null; then
-        dockerd-rootless.sh --experimental --host=unix://$XDG_RUNTIME_DIR/docker.sock &
-      fi
-    '';
-  };
-
-  idx = {
-    extensions = [
-      "Dart-Code.flutter"
-      "Dart-Code.dart-code"
-    ];
-
-    workspace = {
-      onCreate = { };
-      onStart = { };
-    };
-
-    previews = {
-      enable = false;
-    };
   };
 }
 EODEV
 
-    echo "✅ dev.nix created"
+    echo -e "${GREEN}✅ dev.nix created${RESET}"
 
-    # Write vm.sh (HopingBoyz script)
+    # ================= HOPINGBOYZ VM SCRIPT =================
     cat > .idx/vm.sh <<'EOVM'
 #!/bin/bash
 set -euo pipefail
@@ -968,81 +948,80 @@ EOVM
 
     chmod +x .idx/vm.sh
     echo "✅ vm.sh created in .idx"
+    echo -e "${GREEN}✅ VM Manager installed${RESET}"
+    echo -e "${YELLOW}▶ Run it using:${RESET} cd .idx && bash vm.sh"
 
-elif [[ "$choice" == "2" ]]; then
-    echo "🖥️ Installing xRDP + XFCE + Firefox (Debian 11)"
-    sudo apt update && sudo apt upgrade -y
-    sudo apt install -y xfce4 xfce4-goodies xrdp firefox-esr
-
-    echo "startxfce4" > ~/.xsession
-    sudo chown "$(whoami):$(whoami)" ~/.xsession
-
-    sudo systemctl enable xrdp
-    sudo systemctl restart xrdp
-
-    echo
-    echo "✅ xRDP setup complete!"
-    echo "🔑 Login using your Linux username & password"
-    echo "🖥️ Desktop: XFCE"
-    echo "❤ Made By: Kendrick"
-
-elif [[ "$choice" == "3" ]]; then
-    echo "🌐 Installing Telebit..."
-    curl https://get.telebit.io/ | bash
-    echo "✅ Telebit installation finished"
-
-elif [[ "$choice" == "4" ]]; then
+    elif [[ "$choice" == "2" ]]; then
     clear
-    cat << "EOF"
-========================================================
- WINDOWS SETUP: Winget + Cloudflared
-========================================================
- Made by Kendrick
-========================================================
+    echo -e "\e[36m========================================================\e[0m"
+    echo -e "\e[32m        PROXMOX VE INSTALLER (DEBIAN)\e[0m"
+    echo -e "\e[36m========================================================\e[0m"
 
-⚠️ THIS MUST BE RUN ON WINDOWS
-⚠️ RUN POWERSHELL AS ADMIN
+    if ! grep -qi debian /etc/os-release; then
+        echo -e "\e[31m❌ This installer is ONLY for Debian\e[0m"
+        exit 1
+    fi
 
-Copy EVERYTHING below and paste into PowerShell:
+    echo -e "\e[33m📦 Updating system...\e[0m"
+    apt update && apt upgrade -y
 
---------------------------------------------------------
+    echo -e "\e[33m📦 Installing required packages...\e[0m"
+    apt install -y wget curl gnupg lsb-release
 
-# Enable script execution
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    echo -e "\e[33m🔑 Adding Proxmox GPG key...\e[0m"
+    wget -qO /etc/apt/trusted.gpg.d/proxmox-release.gpg \
+    https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg
 
-# Install Winget (if missing)
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing Winget..."
-    Invoke-WebRequest -Uri https://aka.ms/getwinget -OutFile winget.msixbundle
-    Add-AppxPackage winget.msixbundle
-} else {
-    Write-Host "Winget already installed"
-}
+    echo -e "\e[33m📦 Adding Proxmox repository...\e[0m"
+    echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" \
+    > /etc/apt/sources.list.d/pve-install-repo.list
 
-# Install Cloudflared
-winget install --id Cloudflare.cloudflared -e --accept-package-agreements --accept-source-agreements
+    echo -e "\e[33m📦 Updating repo...\e[0m"
+    apt update
 
-# Verify install
-cloudflared --version
+    echo -e "\e[32m🚀 Installing Proxmox VE...\e[0m"
+    apt install -y proxmox-ve postfix open-iscsi
 
-Write-Host "✅ Winget + Cloudflared installed successfully!"
+    echo -e "\e[33m🧹 Removing enterprise repo warning...\e[0m"
+    rm -f /etc/apt/sources.list.d/pve-enterprise.list
+    apt update
 
---------------------------------------------------------
+    echo -e "\e[32m✅ Proxmox VE Installed Successfully!\e[0m"
+    echo -e "\e[36m🌐 Access Web UI: https://YOUR-IP:8006\e[0m"
+     echo -e "\e[36m❤ Made By: Kendrick(LearnWithKendrick)\e[0m"
+    echo -e "\e[31m⚠️ REBOOT REQUIRED\e[0m"
 
-After installing:
-- Use Cloudflared for RDP / SSH tunnels
-- This avoids Telebit protocol issues
+    read -p "Reboot now? (y/N): " rb
+    if [[ "$rb" =~ ^[Yy]$ ]]; then
+        reboot
+    fi
 
-========================================================
- Script by Kendrick
-========================================================
-EOF
 
-    read -p "Press Enter to return to menu..."
+# ==================================================
+# OPTION 3 - XRDP
+# ==================================================
+elif [[ "$choice" == "3" ]]; then
+    echo -e "${BLUE}🖥 Installing xRDP + XFCE + Firefox${RESET}"
+    sudo apt update && sudo apt install -y xfce4 xfce4-goodies xrdp firefox-esr
+    echo "startxfce4" > ~/.xsession
+    sudo systemctl enable xrdp && sudo systemctl restart xrdp
+    echo -e "${GREEN}✅ xRDP Ready${RESET}"
+    echo -e "${MAGENTA}❤ Made By Kendrick${RESET}"
 
+# ==================================================
+# OPTION 4 - TELEBIT
+# ==================================================
+elif [[ "$choice" == "4" ]]; then
+    echo -e "${BLUE}🌐 Installing Telebit...${RESET}"
+    curl https://get.telebit.io/ | bash
+    echo -e "${GREEN}✅ Telebit Installed${RESET}"
+
+# ==================================================
+# EXIT
+# ==================================================
 elif [[ "$choice" == "0" ]]; then
-    echo "Goodbye!"
+    echo -e "${RED}Goodbye!${RESET}"
     exit 0
 else
-    echo "❌ Invalid option"
+    echo -e "${RED}❌ Invalid option${RESET}"
 fi
