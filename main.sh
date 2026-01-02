@@ -33,6 +33,7 @@ echo
 
 read -p "Enter your choice: " choice
 
+
 # =============================
 # CHOICE HANDLING
 # =============================
