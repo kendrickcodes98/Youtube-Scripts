@@ -983,7 +983,7 @@ EOVM
     echo -e "\e[36m🌐 Web UI: https://YOUR-IP:8006\e[0m"
     echo -e "\e[36m🐳 Container will AUTO-START after reboot\e[0m"
 
-    echo -e "\e[35m<3 Made By: Kendrick(LearnWithKendrick) bruh\e[0m"
+    echo -e "\e[35m<3 Made By: Kendrick(LearnWithKendrick)\e[0m"
 
     read -p "Reboot now? (y/N): " rb
     if [[ "$rb" =~ ^[Yy]$ ]]; then
